@@ -8,7 +8,7 @@
 vim.g.mapleader = ","
 vim.g.maplocalleader = ","
 
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Settings ]]
 -- See :help vim.o and :help option-list
@@ -248,6 +248,19 @@ require("lazy").setup({
 		end,
 	},
 
+	-- [[ Plugin: Lazydev ]]
+	-- Configures lua_ls to understand Neovim's Lua API (vim.*, require paths, etc.)
+	{
+		"folke/lazydev.nvim",
+		lazy = false, -- Load immediately, not lazily
+		opts = {
+			library = {
+				-- Load luvit types when the `vim.uv` word is found
+				{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+			},
+		},
+	},
+
 	-- [[ Plugin: LSP ]]
 	-- Configures language servers for code intelligence (completions, go-to-definition, etc.)
 	-- LSPs are provided by Nix, not Mason. See :help lsp for details.
@@ -256,6 +269,7 @@ require("lazy").setup({
 		dependencies = {
 			{ "j-hui/fidget.nvim", opts = {} }, -- Shows LSP progress in bottom-right corner
 			"saghen/blink.cmp",
+			"folke/lazydev.nvim",
 		},
 		config = function()
 			-- Buffer-local keymaps when LSP attaches
@@ -333,24 +347,21 @@ require("lazy").setup({
 				vim.lsp.enable(name)
 			end
 
-			-- Lua: special config for Neovim development
+			-- Lua: configure for Neovim development
 			vim.lsp.config("lua_ls", {
-				on_init = function(client)
-					if client.workspace_folders then
-						local path = client.workspace_folders[1].name
-						if
-							path ~= vim.fn.stdpath("config")
-							and (vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc"))
-						then
-							return
-						end
-					end
-					client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
-						runtime = { version = "LuaJIT", path = { "lua/?.lua", "lua/?/init.lua" } },
-						workspace = { checkThirdParty = false, library = vim.api.nvim_get_runtime_file("", true) },
-					})
-				end,
-				settings = { Lua = {} },
+				capabilities = capabilities,
+				settings = {
+					Lua = {
+						runtime = { version = "LuaJIT" },
+						diagnostics = {
+							globals = { "vim" },
+						},
+						workspace = {
+							checkThirdParty = false,
+							library = vim.api.nvim_get_runtime_file("", true),
+						},
+					},
+				},
 			})
 			vim.lsp.enable("lua_ls")
 		end,
@@ -433,7 +444,16 @@ require("lazy").setup({
 			keymap = { preset = "default" }, -- See :h blink-cmp-config-keymap
 			appearance = { nerd_font_variant = "mono" },
 			completion = { documentation = { auto_show = false, auto_show_delay_ms = 500 } },
-			sources = { default = { "lsp", "path", "snippets" } },
+			sources = {
+				default = { "lazydev", "lsp", "path", "snippets" },
+				providers = {
+					lazydev = {
+						name = "LazyDev",
+						module = "lazydev.integrations.blink",
+						score_offset = 100, -- show at a higher priority than LSP
+					},
+				},
+			},
 			snippets = { preset = "luasnip" },
 			fuzzy = { implementation = "lua" },
 			signature = { enabled = true },
