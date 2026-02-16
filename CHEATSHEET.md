@@ -1,4 +1,4 @@
-# Neovim Kickstart Cheatsheet
+# Neovim Evan Cheatsheet
 
 **Leader: `,`**
 

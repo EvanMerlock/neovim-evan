@@ -1,4 +1,4 @@
-# neovim-kickstart-nix
+# neovim-evan
 
 A Nix flake wrapping [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim) with reproducible LSPs, formatters, and linters.
 
@@ -12,6 +12,7 @@ A Nix flake wrapping [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim
 - **Treesitter** syntax highlighting
 - **Blink.cmp** autocompletion with snippet support
 - **Which-key** for discoverability (press leader and wait)
+- **Lazydev.nvim** for Neovim Lua API completions
 
 See [CHEATSHEET.md](CHEATSHEET.md) for keybindings.
 
@@ -40,7 +41,7 @@ Add the flake input:
 
 ```nix
 {
-  inputs.neovim-kickstart.url = "github:evanmerlock/nvim-testing";
+  inputs.neovim-evan.url = "github:evanmerlock/nvim-testing";
 }
 ```
 
@@ -49,52 +50,50 @@ Then in your Home-Manager configuration:
 ```nix
 { inputs, ... }:
 {
-  imports = [ inputs.neovim-kickstart.homeManagerModules.default ];
+  imports = [ inputs.neovim-evan.homeManagerModules.default ];
 
-  programs.neovim-kickstart = {
-    enable = true;
-    languages = {
-      web = true;      # TypeScript, HTML, CSS, Tailwind, ESLint
-      rust = true;     # rust-analyzer, rustfmt
-      go = true;       # gopls, gofumpt, golangci-lint
-      # all = true;    # Enable everything
-    };
-  };
+  programs.neovim-evan.enable = true;
 }
 ```
 
-## Configuration
+This installs Neovim with all LSPs, formatters, and linters included.
 
-### Language Support
+## Language Support
 
-| Language | LSP | Formatter | Linter | Home-Manager Flag |
-|----------|-----|-----------|--------|-------------------|
-| Web (TS/JS/HTML/CSS) | ts_ls, html, cssls, tailwindcss, eslint | prettierd | eslint_d | `languages.web` |
-| Rust | rust-analyzer | rustfmt | clippy (via LSP) | `languages.rust` |
-| Go | gopls | gofumpt, golines | golangci-lint | `languages.go` |
-| Elixir | elixir-ls | mix format | - | `languages.elixir` |
-| Java | jdtls | google-java-format | - | `languages.java` |
-| Kotlin | kotlin-language-server | ktlint | ktlint | `languages.kotlin` |
-| Lua | lua_ls | stylua | selene | `languages.lua` (default: on) |
-| YAML | yaml-language-server | prettier | yamllint | `languages.yaml` |
-| Terraform | terraform-ls | terraform fmt | tflint | `languages.terraform` |
-| TOML | taplo | taplo | - | `languages.toml` |
-| Nix | nil | nixpkgs-fmt | - | (always included) |
-| Docker | - | - | hadolint | `languages.docker` |
+| Language | LSP | Formatter | Linter |
+|----------|-----|-----------|--------|
+| Web (TS/JS/HTML/CSS) | ts_ls, html, cssls, tailwindcss, eslint | prettierd | eslint_d |
+| Rust | rust-analyzer | rustfmt | clippy (via LSP) |
+| Go | gopls | gofumpt, golines | golangci-lint |
+| Elixir | elixir-ls | mix format | - |
+| Java | jdtls | google-java-format | - |
+| Kotlin | kotlin-language-server | ktlint | ktlint |
+| Lua | lua_ls | stylua | selene |
+| YAML | yaml-language-server | prettier | yamllint |
+| Terraform | terraform-ls | terraform fmt | tflint |
+| TOML | taplo | taplo | - |
+| Nix | nil | nixpkgs-fmt | - |
+| Docker | - | - | hadolint |
 
-### Enabling Optional Plugins
+## Lua Development
 
-These plugins are available but commented out in `init.lua`:
+This config includes **lazydev.nvim** which automatically provides Neovim API completions when editing Lua files.
 
-| Plugin | Description | Require |
-|--------|-------------|---------|
-| debug | DAP debugging support | `kickstart.plugins.debug` |
-| indent_line | Show indent guides | `kickstart.plugins.indent_line` |
-| autopairs | Auto-close brackets/quotes | `kickstart.plugins.autopairs` |
-| neo-tree | File tree sidebar | `kickstart.plugins.neo-tree` |
-| gitsigns keymaps | Additional git hunk navigation | `kickstart.plugins.gitsigns` |
+For **selene** (Lua linter) to recognize the `vim` global, the repo includes:
+- `selene.toml` - points to the vim standard library
+- `vim.yml` - defines `vim` as a valid global
 
-To enable, uncomment the corresponding `require` line in `init.lua` (around line 965).
+## Optional Plugins
+
+These plugins are enabled in `init.lua`:
+
+| Plugin | Description |
+|--------|-------------|
+| debug | DAP debugging support |
+| indent_line | Show indent guides |
+| autopairs | Auto-close brackets/quotes |
+| neo-tree | File tree sidebar |
+| gitsigns keymaps | Additional git hunk navigation |
 
 ### Adding Custom Plugins
 
@@ -142,6 +141,10 @@ Check specific areas:
 
 1. Check conform status: `:ConformInfo`
 2. Ensure formatter is on PATH: `:!which prettierd`
+
+### Selene complaining about `vim`
+
+Ensure you're running nvim from the repo root where `selene.toml` and `vim.yml` are located.
 
 ## Acknowledgments
 
