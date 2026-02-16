@@ -23,6 +23,7 @@ let
     yaml-language-server
     terraform-ls
     taplo # TOML
+    nil # Nix LSP
   ];
 
   # Formatters
@@ -35,6 +36,7 @@ let
     stylua
     google-java-format
     ktlint
+    nixpkgs-fmt
   ];
 
   # Linters
@@ -82,5 +84,6 @@ in
     terraform = with pkgs; [ terraform-ls tflint ];
     toml = with pkgs; [ taplo ];
     docker = with pkgs; [ hadolint ];
+    nix = with pkgs; [ nil nixpkgs-fmt ];
   };
 }

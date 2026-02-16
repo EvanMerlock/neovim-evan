@@ -59,6 +59,7 @@ local check_lsps = function()
     { name = 'yaml-language-server', desc = 'YAML' },
     { name = 'terraform-ls', desc = 'Terraform' },
     { name = 'taplo', desc = 'TOML' },
+    { name = 'nil', desc = 'Nix' },
   }
 
   for _, lsp in ipairs(lsps) do
@@ -83,6 +84,7 @@ local check_formatters = function()
     { name = 'stylua', desc = 'Lua' },
     { name = 'google-java-format', desc = 'Java' },
     { name = 'ktlint', desc = 'Kotlin' },
+    { name = 'nixpkgs-fmt', desc = 'Nix' },
   }
 
   for _, fmt in ipairs(formatters) do

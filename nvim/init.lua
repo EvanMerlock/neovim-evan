@@ -84,11 +84,11 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
--- Set <space> as the leader key
+-- Set <comma> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
-vim.g.mapleader = ' '
-vim.g.maplocalleader = ' '
+vim.g.mapleader = ','
+vim.g.maplocalleader = ','
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
@@ -159,6 +159,18 @@ vim.o.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.o.scrolloff = 10
 
+-- Tab settings
+vim.o.tabstop = 4
+vim.o.softtabstop = 4
+vim.o.shiftwidth = 4
+vim.o.expandtab = true
+
+-- Folding settings
+vim.o.foldenable = true
+vim.o.foldlevelstart = 10
+vim.o.foldnestmax = 10
+vim.o.foldmethod = 'indent'
+
 -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
 -- instead raise a dialog asking if you wish to save the current file(s)
 -- See `:help 'confirm'`
@@ -217,6 +229,21 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
 -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
 -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
+
+-- Custom keymaps from old config
+-- jk to escape insert mode
+vim.keymap.set('i', 'jk', '<Esc>', { desc = 'Exit insert mode' })
+
+-- Swap ; and :
+vim.keymap.set('n', ';', ':', { desc = 'Enter command mode' })
+vim.keymap.set('n', ':', ';', { desc = 'Repeat f/t motion' })
+
+-- Move by visual line
+vim.keymap.set('n', 'j', 'gj', { desc = 'Move down by visual line' })
+vim.keymap.set('n', 'k', 'gk', { desc = 'Move up by visual line' })
+
+-- Space toggles folds (leader is now comma)
+vim.keymap.set('n', '<Space>', 'za', { desc = 'Toggle fold' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -622,6 +649,7 @@ require('lazy').setup({
         yamlls = {},
         terraformls = {},
         taplo = {},
+        nil_ls = {}, -- Nix language server
       }
 
       -- Configure and enable all servers
@@ -715,6 +743,7 @@ require('lazy').setup({
         toml = { 'taplo' },
         terraform = { 'terraform_fmt' },
         ['terraform-vars'] = { 'terraform_fmt' },
+        nix = { 'nixpkgs-fmt' },
       },
     },
   },
@@ -812,25 +841,45 @@ require('lazy').setup({
     },
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
+  { -- Solarized colorscheme
+    'ishan9299/nvim-solarized-lua',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
-      }
+      vim.o.background = 'dark'
+      vim.cmd.colorscheme 'solarized'
+    end,
+  },
 
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+  -- Bufferline (tab-like buffer bar)
+  {
+    'akinsho/bufferline.nvim',
+    version = '*',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    opts = {},
+  },
+
+  -- Telescope file browser (replaces netrw)
+  {
+    'nvim-telescope/telescope-file-browser.nvim',
+    dependencies = { 'nvim-telescope/telescope.nvim', 'nvim-lua/plenary.nvim' },
+    config = function()
+      require('telescope').load_extension 'file_browser'
+      vim.keymap.set('n', '<leader>fb', ':Telescope file_browser<CR>', { desc = '[F]ile [B]rowser' })
+      -- Disable netrw
+      vim.g.loaded_netrw = 1
+      vim.g.loaded_netrwPlugin = 1
+    end,
+  },
+
+  -- Vim-fugitive (Git commands)
+  { 'tpope/vim-fugitive' },
+
+  -- VimTeX (LaTeX support)
+  {
+    'lervag/vimtex',
+    ft = { 'tex', 'latex' },
+    config = function()
+      vim.g.vimtex_view_method = 'skim' -- or 'zathura' on Linux
     end,
   },
 
@@ -877,33 +926,24 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     config = function()
       local filetypes = {
-        'bash',
-        'c',
-        'css',
-        'diff',
-        'dockerfile',
-        'elixir',
-        'go',
-        'gomod',
-        'gosum',
-        'html',
-        'java',
-        'javascript',
-        'json',
-        'kotlin',
-        'lua',
-        'luadoc',
-        'markdown',
-        'markdown_inline',
-        'query',
-        'rust',
-        'terraform',
-        'toml',
-        'tsx',
-        'typescript',
-        'vim',
-        'vimdoc',
-        'yaml',
+        -- Core
+        'bash', 'c', 'cpp', 'lua', 'luadoc', 'vim', 'vimdoc', 'query',
+        -- Web
+        'css', 'html', 'javascript', 'json', 'tsx', 'typescript',
+        -- Systems
+        'rust', 'go', 'gomod', 'gosum', 'zig',
+        -- JVM
+        'java', 'kotlin', 'scala',
+        -- Functional
+        'elixir', 'erlang', 'haskell', 'ocaml', 'clojure',
+        -- Config/Infra
+        'dockerfile', 'terraform', 'yaml', 'toml', 'nix', 'cmake', 'make',
+        -- Data
+        'xml', 'csv', 'sql', 'graphql',
+        -- Documentation
+        'markdown', 'markdown_inline', 'latex', 'diff',
+        -- Other useful
+        'python', 'ruby', 'perl', 'awk', 'regex', 'git_rebase', 'gitcommit',
       }
       require('nvim-treesitter').install(filetypes)
       vim.api.nvim_create_autocmd('FileType', {
