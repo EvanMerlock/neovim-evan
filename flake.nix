@@ -1,8 +1,8 @@
 {
-  description = "Kickstart.nvim as a Nix Flake with Home-Manager support";
+  description = "Evan's personal nvim config, based on Kickstart.nvim and adjusted to be Nix-friendly";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"
     flake-utils.url = "github:numtide/flake-utils";
     home-manager = {
       url = "github:nix-community/home-manager";

@@ -124,16 +124,16 @@ require("lazy").setup({
 	-- Detects indentation style (tabs vs spaces) from file content
 	{ "NMAC427/guess-indent.nvim", opts = {} },
 
-	-- Shows git diff markers (+/~/−) in the sign column
+	-- Shows git diff markers in the sign column (colored bar)
 	{
 		"lewis6991/gitsigns.nvim",
 		opts = {
 			signs = {
-				add = { text = "+" },
-				change = { text = "~" },
-				delete = { text = "_" },
-				topdelete = { text = "‾" },
-				changedelete = { text = "~" },
+				add = { text = "│" },
+				change = { text = "│" },
+				delete = { text = "│" },
+				topdelete = { text = "│" },
+				changedelete = { text = "│" },
 			},
 		},
 	},
