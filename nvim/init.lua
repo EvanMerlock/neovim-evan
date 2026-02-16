@@ -28,7 +28,6 @@ vim.o.updatetime = 250
 vim.o.timeoutlen = 300
 vim.o.splitright = true
 vim.o.splitbelow = true
-vim.o.list = true
 vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 vim.o.inccommand = "split" -- Live preview for :s
 vim.o.cursorline = true
@@ -121,9 +120,12 @@ rtp:prepend(lazypath)
 require("lazy").setup({
 
 	-- [[ Plugin: Core ]]
+
+	-- Detects indentation style (tabs vs spaces) from file content
 	{ "NMAC427/guess-indent.nvim", opts = {} },
 
-	{ -- Gitsigns: git status in the gutter
+	-- Shows git diff markers (+/~/−) in the sign column
+	{
 		"lewis6991/gitsigns.nvim",
 		opts = {
 			signs = {
@@ -136,7 +138,8 @@ require("lazy").setup({
 		},
 	},
 
-	{ -- Which-key: shows pending keybinds
+	-- Displays available keybindings in a popup as you type
+	{
 		"folke/which-key.nvim",
 		event = "VimEnter",
 		opts = {
@@ -154,6 +157,7 @@ require("lazy").setup({
 	},
 
 	-- [[ Plugin: Telescope ]]
+	-- Fuzzy finder for files, grep, buffers, LSP symbols, and more
 	{
 		"nvim-telescope/telescope.nvim",
 		enabled = true,
@@ -245,11 +249,12 @@ require("lazy").setup({
 	},
 
 	-- [[ Plugin: LSP ]]
+	-- Configures language servers for code intelligence (completions, go-to-definition, etc.)
 	-- LSPs are provided by Nix, not Mason. See :help lsp for details.
 	{
 		"neovim/nvim-lspconfig",
 		dependencies = {
-			{ "j-hui/fidget.nvim", opts = {} }, -- LSP status in corner
+			{ "j-hui/fidget.nvim", opts = {} }, -- Shows LSP progress in bottom-right corner
 			"saghen/blink.cmp",
 		},
 		config = function()
@@ -351,7 +356,8 @@ require("lazy").setup({
 		end,
 	},
 
-	-- [[ Plugin: Conform (formatting) ]]
+	-- [[ Plugin: Conform ]]
+	-- Auto-formats code on save using external formatters (prettier, rustfmt, etc.)
 	{
 		"stevearc/conform.nvim",
 		event = { "BufWritePre" },
@@ -401,12 +407,14 @@ require("lazy").setup({
 		},
 	},
 
-	-- [[ Plugin: Blink.cmp (completion) ]]
+	-- [[ Plugin: Blink.cmp ]]
+	-- Fast autocompletion with LSP, path, and snippet sources
 	{
 		"saghen/blink.cmp",
 		event = "VimEnter",
 		version = "1.*",
 		dependencies = {
+			-- Snippet engine for expandable completions
 			{
 				"L3MON4D3/LuaSnip",
 				version = "2.*",
@@ -433,6 +441,8 @@ require("lazy").setup({
 	},
 
 	-- [[ Plugin: UI ]]
+
+	-- Solarized dark colorscheme
 	{
 		"ishan9299/nvim-solarized-lua",
 		priority = 1000,
@@ -442,8 +452,10 @@ require("lazy").setup({
 		end,
 	},
 
+	-- Tab-like bar showing open buffers at the top of the screen
 	{ "akinsho/bufferline.nvim", version = "*", dependencies = { "nvim-tree/nvim-web-devicons" }, opts = {} },
 
+	-- File browser extension for Telescope (replaces netrw)
 	{
 		"nvim-telescope/telescope-file-browser.nvim",
 		dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
@@ -456,9 +468,11 @@ require("lazy").setup({
 	},
 
 	-- [[ Plugin: Git ]]
+	-- Git commands in Vim (:G status, :G commit, :G blame, etc.)
 	{ "tpope/vim-fugitive" },
 
 	-- [[ Plugin: LaTeX ]]
+	-- LaTeX editing with compilation, preview, and syntax support
 	{
 		"lervag/vimtex",
 		ft = { "tex", "latex" },
@@ -468,6 +482,8 @@ require("lazy").setup({
 	},
 
 	-- [[ Plugin: Extras ]]
+
+	-- Highlights TODO, FIXME, NOTE, etc. in comments
 	{
 		"folke/todo-comments.nvim",
 		event = "VimEnter",
@@ -475,11 +491,15 @@ require("lazy").setup({
 		opts = { signs = false },
 	},
 
-	{ -- mini.nvim: text objects, surround, statusline
+	-- Collection of small, independent plugins:
+	-- - mini.ai: Enhanced text objects (va), ci', yinq, etc.)
+	-- - mini.surround: Add/delete/change surroundings (saiw), sd', sr)')
+	-- - mini.statusline: Minimal statusline
+	{
 		"nvim-mini/mini.nvim",
 		config = function()
-			require("mini.ai").setup({ n_lines = 500 }) -- Text objects (va), ci', etc.)
-			require("mini.surround").setup() -- Surround (saiw), sd', sr)')
+			require("mini.ai").setup({ n_lines = 500 })
+			require("mini.surround").setup()
 			local statusline = require("mini.statusline")
 			statusline.setup({ use_icons = vim.g.have_nerd_font })
 			---@diagnostic disable-next-line: duplicate-set-field
@@ -490,6 +510,7 @@ require("lazy").setup({
 	},
 
 	-- [[ Plugin: Treesitter ]]
+	-- Syntax highlighting and code parsing using tree-sitter grammars
 	{
 		"nvim-treesitter/nvim-treesitter",
 		config = function()
@@ -556,10 +577,10 @@ require("lazy").setup({
 
 	-- [[ Optional Plugins ]]
 	-- Uncomment to enable (restart required)
-	require("kickstart.plugins.debug"), -- DAP debugging
-	require("kickstart.plugins.lint"),
-	require("kickstart.plugins.indent_line"),
-	require("kickstart.plugins.autopairs"), -- Auto-close brackets
+	require("kickstart.plugins.debug"), -- DAP debugger integration
+	require("kickstart.plugins.lint"), -- Async linting with nvim-lint
+	require("kickstart.plugins.indent_line"), -- Visual indent guides
+	require("kickstart.plugins.autopairs"), -- Auto-close brackets and quotes
 	require("kickstart.plugins.neo-tree"), -- File tree sidebar
 	require("kickstart.plugins.gitsigns"), -- Git hunk navigation keymaps
 
