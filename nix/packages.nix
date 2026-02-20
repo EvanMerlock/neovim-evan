@@ -59,6 +59,8 @@ let
     nodejs
     fd
     tree-sitter
+    lua5_1
+    lua51Packages.luarocks
   ];
 
 in

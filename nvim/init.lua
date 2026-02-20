@@ -632,6 +632,7 @@ require("lazy").setup({
 	-- Custom plugins: create files in lua/custom/plugins/ and uncomment:
 	-- { import = 'custom.plugins' },
 }, {
+	rocks = { hererocks = false }, -- Use system luarocks from Nix
 	ui = {
 		icons = vim.g.have_nerd_font and {} or {
 			cmd = "⌘",
