@@ -14,7 +14,9 @@ in
   config = lib.mkIf cfg.enable {
     programs.neovim = {
       enable = true;
-      extraPackages = packages.all;
+      extraWrapperArgs = [
+        "--prefix" "PATH" ":" (lib.makeBinPath packages.all)
+      ];
     };
 
     # Symlink the config directory
