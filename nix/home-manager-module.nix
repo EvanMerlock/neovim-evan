@@ -1,6 +1,11 @@
 { self }:
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.programs.neovim-evan;
@@ -14,8 +19,15 @@ in
   config = lib.mkIf cfg.enable {
     programs.neovim = {
       enable = true;
+      defaultEditor = true;
+      viAlias = true;
+      vimAlias = true;
+      vimdiffAlias = true;
       extraWrapperArgs = [
-        "--prefix" "PATH" ":" (lib.makeBinPath packages.all)
+        "--prefix"
+        "PATH"
+        ":"
+        (lib.makeBinPath packages.all)
       ];
     };
 
