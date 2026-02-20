@@ -73,14 +73,10 @@ vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right win
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 
--- =============================================================================
--- CUSTOM KEYMAPS (deviations from kickstart defaults)
--- =============================================================================
-
--- Ergonomic: jk is faster than reaching for Esc
+-- Switch insert mode to jk to make it easier to exit
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 
--- Frequency: : is used far more often than ; so swap them
+-- Switch ; and : because that's quicker
 vim.keymap.set("n", ";", ":", { desc = "Enter command mode" })
 vim.keymap.set("n", ":", ";", { desc = "Repeat f/t motion" })
 
@@ -131,9 +127,39 @@ require("lazy").setup({
 			signs = {
 				add = { text = "│" },
 				change = { text = "│" },
-				delete = { text = "│" },
-				topdelete = { text = "│" },
-				changedelete = { text = "│" },
+				delete = { text = "_" },
+				topdelete = { text = "‾" },
+				changedelete = { text = "~" },
+				untracked = { text = "┆" },
+			},
+			signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
+			numhl = false, -- Toggle with `:Gitsigns toggle_numhl`
+			linehl = false, -- Toggle with `:Gitsigns toggle_linehl`
+			word_diff = false, -- Toggle with `:Gitsigns toggle_word_diff`
+			watch_gitdir = {
+				interval = 1000,
+				follow_files = true,
+			},
+			attach_to_untracked = true,
+			current_line_blame = false, -- Toggle with `:Gitsigns toggle_current_line_blame`
+			current_line_blame_opts = {
+				virt_text = true,
+				virt_text_pos = "eol", -- 'eol' | 'overlay' | 'right_align'
+				delay = 1000,
+				ignore_whitespace = false,
+			},
+			current_line_blame_formatter = "<author>, <author_time:%Y-%m-%d> - <summary>",
+			sign_priority = 6,
+			update_debounce = 100,
+			status_formatter = nil, -- Use default
+			max_file_length = 40000, -- Disable if file is longer than this (in lines)
+			preview_config = {
+				-- Options passed to nvim_open_win
+				border = "single",
+				style = "minimal",
+				relative = "cursor",
+				row = 0,
+				col = 1,
 			},
 		},
 	},
@@ -602,7 +628,6 @@ require("lazy").setup({
 	require("kickstart.plugins.indent_line"), -- Visual indent guides
 	require("kickstart.plugins.autopairs"), -- Auto-close brackets and quotes
 	require("kickstart.plugins.neo-tree"), -- File tree sidebar
-	require("kickstart.plugins.gitsigns"), -- Git hunk navigation keymaps
 
 	-- Custom plugins: create files in lua/custom/plugins/ and uncomment:
 	-- { import = 'custom.plugins' },

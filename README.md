@@ -1,6 +1,9 @@
 # neovim-evan
 
-A Nix flake wrapping [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim) with reproducible LSPs, formatters, and linters.
+A Nix flake with my Neovim configuration with reproducible LSPs, formatters, and linters.
+
+Built off of my old Vim configuration, but with Kickstart as a base.
+Utilized Claude Opus to automate configuration wrapping in a reasonable manner.
 
 ## Features
 
@@ -25,7 +28,7 @@ See [CHEATSHEET.md](CHEATSHEET.md) for keybindings.
 ### Try It (No Install)
 
 ```bash
-nix run github:evanmerlock/nvim-testing
+nix run github:evanmerlock/neovim-evan
 ```
 
 ### Development Shell
@@ -41,7 +44,7 @@ Add the flake input:
 
 ```nix
 {
-  inputs.neovim-evan.url = "github:evanmerlock/nvim-testing";
+  inputs.neovim-evan.url = "github:evanmerlock/neovim-evan";
 }
 ```
 
@@ -60,26 +63,27 @@ This installs Neovim with all LSPs, formatters, and linters included.
 
 ## Language Support
 
-| Language | LSP | Formatter | Linter |
-|----------|-----|-----------|--------|
-| Web (TS/JS/HTML/CSS) | ts_ls, html, cssls, tailwindcss, eslint | prettierd | eslint_d |
-| Rust | rust-analyzer | rustfmt | clippy (via LSP) |
-| Go | gopls | gofumpt, golines | golangci-lint |
-| Elixir | elixir-ls | mix format | - |
-| Java | jdtls | google-java-format | - |
-| Kotlin | kotlin-language-server | ktlint | ktlint |
-| Lua | lua_ls | stylua | selene |
-| YAML | yaml-language-server | prettier | yamllint |
-| Terraform | terraform-ls | terraform fmt | tflint |
-| TOML | taplo | taplo | - |
-| Nix | nil | nixpkgs-fmt | - |
-| Docker | - | - | hadolint |
+| Language             | LSP                                     | Formatter          | Linter           |
+| -------------------- | --------------------------------------- | ------------------ | ---------------- |
+| Web (TS/JS/HTML/CSS) | ts_ls, html, cssls, tailwindcss, eslint | prettierd          | eslint_d         |
+| Rust                 | rust-analyzer                           | rustfmt            | clippy (via LSP) |
+| Go                   | gopls                                   | gofumpt, golines   | golangci-lint    |
+| Elixir               | elixir-ls                               | mix format         | -                |
+| Java                 | jdtls                                   | google-java-format | -                |
+| Kotlin               | kotlin-language-server                  | ktlint             | ktlint           |
+| Lua                  | lua_ls                                  | stylua             | selene           |
+| YAML                 | yaml-language-server                    | prettier           | yamllint         |
+| Terraform            | terraform-ls                            | terraform fmt      | tflint           |
+| TOML                 | taplo                                   | taplo              | -                |
+| Nix                  | nil                                     | nixpkgs-fmt        | -                |
+| Docker               | -                                       | -                  | hadolint         |
 
 ## Lua Development
 
 This config includes **lazydev.nvim** which automatically provides Neovim API completions when editing Lua files.
 
 For **selene** (Lua linter) to recognize the `vim` global, the repo includes:
+
 - `selene.toml` - points to the vim standard library
 - `vim.yml` - defines `vim` as a valid global
 
@@ -87,12 +91,12 @@ For **selene** (Lua linter) to recognize the `vim` global, the repo includes:
 
 These plugins are enabled in `init.lua`:
 
-| Plugin | Description |
-|--------|-------------|
-| debug | DAP debugging support |
-| indent_line | Show indent guides |
-| autopairs | Auto-close brackets/quotes |
-| neo-tree | File tree sidebar |
+| Plugin           | Description                    |
+| ---------------- | ------------------------------ |
+| debug            | DAP debugging support          |
+| indent_line      | Show indent guides             |
+| autopairs        | Auto-close brackets/quotes     |
+| neo-tree         | File tree sidebar              |
 | gitsigns keymaps | Additional git hunk navigation |
 
 ### Adding Custom Plugins
@@ -105,7 +109,7 @@ Create files in `nvim/lua/custom/plugins/` and uncomment the import line in `ini
 
 ## Customization Notes
 
-This config diverges from upstream kickstart.nvim:
+This config diverges from Kickstart:
 
 - **Leader** is `,` (not `<Space>`)
 - **`;` and `:`** are swapped (`;` enters command mode)
