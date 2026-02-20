@@ -3,7 +3,7 @@
 let
   # Copy config to the nix store
   configStore = pkgs.stdenv.mkDerivation {
-    name = "nvim-kickstart-config";
+    name = "neovim-evan-config";
     src = configDir;
     installPhase = ''
       mkdir -p $out
@@ -13,13 +13,13 @@ let
 
   # Create a wrapper script that sets up the environment
   neovimWrapped = pkgs.symlinkJoin {
-    name = "neovim-kickstart";
+    name = "neovim-evan";
     paths = [ pkgs.neovim ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/nvim \
         --prefix PATH : ${pkgs.lib.makeBinPath runtimeDeps} \
-        --set NVIM_APPNAME "nvim-kickstart" \
+        --set NVIM_APPNAME "neovim-evan" \
         --add-flags "--cmd 'set rtp^=${configStore}'" \
         --add-flags "-u ${configStore}/init.lua"
     '';
