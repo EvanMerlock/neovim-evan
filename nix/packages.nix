@@ -24,6 +24,7 @@ let
     terraform-ls
     taplo # TOML
     nil # Nix LSP
+    nls # Nickel LSP
   ];
 
   # Formatters
@@ -87,5 +88,6 @@ in
     toml = with pkgs; [ taplo ];
     docker = with pkgs; [ hadolint ];
     nix = with pkgs; [ nil nixpkgs-fmt ];
+    nickel = with pkgs; [ nls nickel ];
   };
 }

@@ -8,6 +8,14 @@
 vim.g.mapleader = ","
 vim.g.maplocalleader = ","
 
+-- [[ Filetype Detection ]]
+-- Register filetypes not recognized by Neovim by default
+vim.filetype.add({
+	extension = {
+		ncl = "nickel",
+	},
+})
+
 vim.g.have_nerd_font = true
 
 -- [[ Settings ]]
@@ -410,6 +418,7 @@ require("lazy").setup({
 				terraformls = {},
 				taplo = {},
 				nil_ls = {},
+				nickel_ls = {},
 			}
 
 			for name, config in pairs(servers) do
@@ -478,6 +487,7 @@ require("lazy").setup({
 				rust = { "rustfmt" },
 				go = { "gofumpt", "golines" },
 				elixir = { "mix" },
+				heex = { "mix" },
 				java = { "google-java-format" },
 				kotlin = { "ktlint" },
 				yaml = { "prettierd", "prettier", stop_after_first = true },
@@ -485,6 +495,7 @@ require("lazy").setup({
 				terraform = { "terraform_fmt" },
 				["terraform-vars"] = { "terraform_fmt" },
 				nix = { "nixpkgs-fmt" },
+				nickel = { "nickel" },
 			},
 		},
 	},
@@ -629,6 +640,7 @@ require("lazy").setup({
 				"kotlin",
 				"scala",
 				"elixir",
+				"heex",
 				"erlang",
 				"haskell",
 				"ocaml",
@@ -638,6 +650,7 @@ require("lazy").setup({
 				"yaml",
 				"toml",
 				"nix",
+				"nickel",
 				"cmake",
 				"make",
 				"xml",
