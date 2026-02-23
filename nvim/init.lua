@@ -99,8 +99,23 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 -- [[ Custom Commands ]]
--- Shell commands: like ! but output goes to a split/tab buffer
+-- Terminal commands: run in interactive terminal
+-- :T [cmd]  - horizontal split terminal
+vim.api.nvim_create_user_command("T", function(opts)
+	vim.cmd("split | term " .. opts.args)
+end, { nargs = "*", complete = "shellcmd" })
 
+-- :VT [cmd] - vertical split terminal
+vim.api.nvim_create_user_command("VT", function(opts)
+	vim.cmd("vsplit | term " .. opts.args)
+end, { nargs = "*", complete = "shellcmd" })
+
+-- :TT [cmd] - new tab terminal
+vim.api.nvim_create_user_command("TT", function(opts)
+	vim.cmd("tabnew | term " .. opts.args)
+end, { nargs = "*", complete = "shellcmd" })
+
+-- Static buffer commands: output goes to a read-only buffer
 local function run_to_buffer(cmd, split_cmd)
 	vim.cmd(split_cmd .. " | enew")
 	local buf = vim.api.nvim_get_current_buf()
@@ -113,18 +128,18 @@ local function run_to_buffer(cmd, split_cmd)
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, output)
 end
 
--- :T cmd  - run in horizontal split
-vim.api.nvim_create_user_command("T", function(opts)
+-- :R cmd  - horizontal split buffer
+vim.api.nvim_create_user_command("R", function(opts)
 	run_to_buffer(opts.args, "split")
 end, { nargs = "+", complete = "shellcmd" })
 
--- :VT cmd - run in vertical split
-vim.api.nvim_create_user_command("VT", function(opts)
+-- :VR cmd - vertical split buffer
+vim.api.nvim_create_user_command("VR", function(opts)
 	run_to_buffer(opts.args, "vsplit")
 end, { nargs = "+", complete = "shellcmd" })
 
--- :TT cmd - run in new tab
-vim.api.nvim_create_user_command("TT", function(opts)
+-- :RR cmd - new tab buffer
+vim.api.nvim_create_user_command("RR", function(opts)
 	run_to_buffer(opts.args, "tabnew")
 end, { nargs = "+", complete = "shellcmd" })
 
