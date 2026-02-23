@@ -98,6 +98,36 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
+-- [[ Custom Commands ]]
+-- Shell commands: like ! but output goes to a split/tab buffer
+
+local function run_to_buffer(cmd, split_cmd)
+	vim.cmd(split_cmd .. " | enew")
+	local buf = vim.api.nvim_get_current_buf()
+	vim.bo[buf].buftype = "nofile"
+	vim.bo[buf].bufhidden = "wipe"
+	vim.bo[buf].swapfile = false
+	vim.bo[buf].modifiable = true
+	vim.api.nvim_buf_set_name(buf, "$ " .. cmd)
+	local output = vim.fn.systemlist(cmd)
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, output)
+end
+
+-- :T cmd  - run in horizontal split
+vim.api.nvim_create_user_command("T", function(opts)
+	run_to_buffer(opts.args, "split")
+end, { nargs = "+", complete = "shellcmd" })
+
+-- :VT cmd - run in vertical split
+vim.api.nvim_create_user_command("VT", function(opts)
+	run_to_buffer(opts.args, "vsplit")
+end, { nargs = "+", complete = "shellcmd" })
+
+-- :TT cmd - run in new tab
+vim.api.nvim_create_user_command("TT", function(opts)
+	run_to_buffer(opts.args, "tabnew")
+end, { nargs = "+", complete = "shellcmd" })
+
 -- [[ Plugin Manager: lazy.nvim ]]
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
