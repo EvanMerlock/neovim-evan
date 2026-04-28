@@ -23,6 +23,8 @@ in
       viAlias = true;
       vimAlias = true;
       vimdiffAlias = true;
+      withRuby = false;
+      withPython3 = true;
       extraWrapperArgs = [
         "--prefix"
         "PATH"
