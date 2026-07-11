@@ -1,0 +1,5 @@
+# Default yamllint config shipped with this Neovim.
+# Overridden by a project-local .yamllint / .yamllint.yaml / .yamllint.yml.
+extends: default
+rules:
+  line-length: disable

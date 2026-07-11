@@ -1,4 +1,4 @@
-{ pkgs, runtimeDeps, configDir }:
+{ pkgs, runtimeDeps, configDir, yamllintConfig }:
 
 let
   # Copy config to the nix store
@@ -20,6 +20,7 @@ let
       wrapProgram $out/bin/nvim \
         --prefix PATH : ${pkgs.lib.makeBinPath runtimeDeps} \
         --set NVIM_APPNAME "neovim-evan" \
+        --set YAMLLINT_CONFIG_FILE ${yamllintConfig} \
         --add-flags "--cmd 'set rtp^=${configStore}'" \
         --add-flags "-u ${configStore}/init.lua"
     '';

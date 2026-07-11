@@ -30,6 +30,9 @@ in
         "PATH"
         ":"
         (lib.makeBinPath packages.all)
+        "--set"
+        "YAMLLINT_CONFIG_FILE"
+        "${../yamllint.yaml}"
       ];
     };
 

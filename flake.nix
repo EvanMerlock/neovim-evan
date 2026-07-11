@@ -26,6 +26,7 @@
             inherit pkgs;
             runtimeDeps = packages.all;
             configDir = ./nvim;
+            yamllintConfig = ./yamllint.yaml;
           };
         in
         {
