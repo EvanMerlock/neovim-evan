@@ -27,13 +27,14 @@ This is a Nix flake that packages a customized Neovim configuration based on kic
 ### Nix Setup
 
 - **Development shell**: `nix develop` provides nvim with all tools on PATH
-- **Home-manager module**: `programs.neovim-evan.enable = true` installs everything
+- **Home-manager module**: `programs.neovim-evan.enable = true` bundles only the core `tools`; LSPs are inherited from the environment. Opt into extras with `languages`, `extraPackages`, or `allLanguages` (see below).
 - **NVIM_APPNAME**: Set to `nvim-kickstart` to isolate config/data directories
 
 ### Plugin Management
 
 - Plugins are managed by **lazy.nvim** (downloaded at runtime, not Nix)
-- LSPs/formatters/linters are provided by **Nix** (not Mason)
+- Core `tools` (git, ripgrep, fd, gcc, tree-sitter, nodejs, …) are provided by **Nix** (not Mason) and always bundled
+- LSPs/formatters/linters are **inherited from the ambient environment/PATH** by default; install them via the home-manager module's `languages`/`extraPackages` options
 - Plugin specs are in `nvim/init.lua`
 
 ### LSP Configuration
@@ -58,8 +59,28 @@ This is a Nix flake that packages a customized Neovim configuration based on kic
 
 ### Modifying the home-manager module
 
-Edit `nix/home-manager-module.nix`. The module is simple:
-- `programs.neovim-evan.enable = true` installs everything from `packages.all`
+Edit `nix/home-manager-module.nix`. Options:
+- `programs.neovim-evan.enable = true` bundles only `packages.tools`; LSPs are inherited from the environment
+- `languages = [ "rust" "go" ]` installs those `byLanguage` toolchains (LSP + formatter + linter)
+- `extraPackages = [ pkgs.some-custom-lsp ]` adds arbitrary/custom LSPs
+- `allLanguages = true` installs every bundled toolchain (restores the old "everything" behavior)
+- `customLanguages.<lang>` registers a brand-new language entirely from home-manager (no init.lua edits): a block declares its `filetypes`, a required `server` (`{ name; package; config; }` → `vim.lsp.config`), and optional `formatters`/`linters` (`attrsOf { package; definition; }`, keyed by conform/nvim-lint tool name). Each tool carries its own `package`. The module writes a store-backed `~/.config/nvim/lua/neovim_evan_custom.lua` that `init.lua`/`lint.lua` merge in. Definitions are declarative/JSON-serializable only — function fields (`on_attach`, function `settings`, function `parser`, `cwd`/`condition`) must go in init.lua.
+
+Example:
+```nix
+programs.neovim-evan.customLanguages.gleam = {
+  filetypes = [ "gleam" ];
+  server = {
+    name = "gleam";
+    package = pkgs.gleam;
+    config = { cmd = [ "gleam" "lsp" ]; root_markers = [ "gleam.toml" ]; };
+  };
+  formatters.gleam_fmt = {
+    package = pkgs.gleam;
+    definition = { command = "gleam"; args = [ "format" "--stdin" ]; stdin = true; };
+  };
+};
+```
 
 ### Testing changes
 

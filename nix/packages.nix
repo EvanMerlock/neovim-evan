@@ -64,16 +64,6 @@ let
     lua51Packages.luarocks
   ];
 
-in
-{
-  inherit lsps-web lsps-backend lsps-infra formatters linters tools;
-
-  # All LSPs combined
-  lsps = lsps-web ++ lsps-backend ++ lsps-infra;
-
-  # All packages combined
-  all = lsps-web ++ lsps-backend ++ lsps-infra ++ formatters ++ linters ++ tools;
-
   # Language-specific groups for home-manager module
   byLanguage = {
     web = lsps-web ++ (with pkgs; [ prettierd eslint_d ]);
@@ -90,4 +80,21 @@ in
     nix = with pkgs; [ nil nixpkgs-fmt ];
     nickel = with pkgs; [ nls nickel ];
   };
+
+  # Valid language names for the home-manager module option enum
+  languageNames = builtins.attrNames byLanguage;
+
+  # Resolve a list of language names to their combined package lists
+  packagesForLanguages = langs: pkgs.lib.concatMap (l: byLanguage.${l}) langs;
+
+in
+{
+  inherit lsps-web lsps-backend lsps-infra formatters linters tools;
+  inherit byLanguage languageNames packagesForLanguages;
+
+  # All LSPs combined
+  lsps = lsps-web ++ lsps-backend ++ lsps-infra;
+
+  # All packages combined
+  all = lsps-web ++ lsps-backend ++ lsps-infra ++ formatters ++ linters ++ tools;
 }

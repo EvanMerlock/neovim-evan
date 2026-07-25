@@ -1,4 +1,4 @@
-{ pkgs, runtimeDeps, configDir, yamllintConfig }:
+{ pkgs, runtimeDeps, configDir, yamllintConfig, extraPackages ? [] }:
 
 let
   # Copy config to the nix store
@@ -18,7 +18,7 @@ let
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/nvim \
-        --prefix PATH : ${pkgs.lib.makeBinPath runtimeDeps} \
+        --prefix PATH : ${pkgs.lib.makeBinPath (runtimeDeps ++ extraPackages)} \
         --set NVIM_APPNAME "neovim-evan" \
         --set YAMLLINT_CONFIG_FILE ${yamllintConfig} \
         --add-flags "--cmd 'set rtp^=${configStore}'" \

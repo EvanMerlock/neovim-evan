@@ -24,7 +24,7 @@
           packages = import ./nix/packages.nix { inherit pkgs; };
           wrappedNeovim = import ./nix/neovim.nix {
             inherit pkgs;
-            runtimeDeps = packages.all;
+            runtimeDeps = packages.tools;
             configDir = ./nvim;
             yamllintConfig = ./yamllint.yaml;
           };
