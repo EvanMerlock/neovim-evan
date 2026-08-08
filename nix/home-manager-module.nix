@@ -41,6 +41,25 @@ let
   # Merged into init.lua's own vim.filetype.add call.
   filetypeExtensions = lib.foldlAttrs (acc: _: l: acc // l.filetypeExtensions) { } langs;
 
+  # filetype -> { options; append; }, keyed per filetype like byFt because a
+  # block may cover several. Languages declaring none contribute nothing.
+  bufferSettings = lib.foldlAttrs
+    (acc: _: l:
+      if l.bufferOptions == { } && l.bufferOptionsAppend == { } then acc
+      else lib.foldl'
+        (a: ft: a // {
+          ${ft} = {
+            options = (a.${ft}.options or { }) // l.bufferOptions;
+            append = (a.${ft}.append or { }) // l.bufferOptionsAppend;
+          };
+        })
+        acc
+        l.filetypes)
+    { } langs;
+
+  # Highlight groups are global, so this is a flat merge like the extensions.
+  highlightLinks = lib.foldlAttrs (acc: _: l: acc // l.highlightLinks) { } langs;
+
   # tool name -> definition, keeping only non-empty definitions.
   defsOf = getTools: lib.filterAttrs (_: d: d != { })
     (lib.foldlAttrs (acc: _: l: acc // lib.mapAttrs (_: t: t.definition) (getTools l)) { } langs);
@@ -57,6 +76,8 @@ let
   customConfig = {
     servers = serverConfigs;
     filetype_extensions = filetypeExtensions;
+    buffer_settings = bufferSettings;
+    highlight_links = highlightLinks;
     formatters_by_ft = byFt (l: l.formatters);
     formatter_defs = defsOf (l: l.formatters);
     linters_by_ft = byFt (l: l.linters);
@@ -104,11 +125,42 @@ let
       filetypeExtensions = lib.mkOption {
         type = with lib.types; attrsOf str;
         default = { };
-        example = { hlisp = "hlisp"; };
+        example = { gleam = "gleam"; };
         description = ''
           File extensions to map to a filetype, passed to vim.filetype.add.
           Needed when the language's filetype is not one Neovim detects by
           itself; without it the LSP has nothing to attach to.
+        '';
+      };
+      bufferOptions = lib.mkOption {
+        type = with lib.types; attrsOf (oneOf [ bool int str ]);
+        default = { };
+        example = { commentstring = "// %s"; expandtab = true; };
+        description = ''
+          Buffer-local options set when a buffer of this language opens
+          (vim.bo). A filetype Neovim ships no ftplugin for has no other
+          source for these.
+        '';
+      };
+      bufferOptionsAppend = lib.mkOption {
+        type = with lib.types; attrsOf (listOf str);
+        default = { };
+        example = { iskeyword = [ "-" "?" "!" ]; };
+        description = ''
+          Values appended to buffer-local list options
+          (vim.opt_local:append), for options like iskeyword where replacing
+          the default is wrong.
+        '';
+      };
+      highlightLinks = lib.mkOption {
+        type = with lib.types; attrsOf str;
+        default = { };
+        example = { "@lsp.type.boolean" = "@boolean"; };
+        description = ''
+          Highlight groups to link, for non-standard semantic token types
+          this language's server declares. Neovim links the standard ones
+          itself, so a server's extra precision renders as plain text until
+          it is linked here.
         '';
       };
       server = lib.mkOption {

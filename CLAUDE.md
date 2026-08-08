@@ -64,7 +64,13 @@ Edit `nix/home-manager-module.nix`. Options:
 - `languages = [ "rust" "go" ]` installs those `byLanguage` toolchains (LSP + formatter + linter)
 - `extraPackages = [ pkgs.some-custom-lsp ]` adds arbitrary/custom LSPs
 - `allLanguages = true` installs every bundled toolchain (restores the old "everything" behavior)
-- `customLanguages.<lang>` registers a brand-new language entirely from home-manager (no init.lua edits): a block declares its `filetypes`, an optional `filetypeExtensions` (extension → filetype, for filetypes Neovim doesn't detect itself), a required `server` (`{ name; package; config; }` → `vim.lsp.config`), and optional `formatters`/`linters` (`attrsOf { package; definition; }`, keyed by conform/nvim-lint tool name). Each tool carries its own `package`. The module writes a store-backed `~/.config/nvim/lua/neovim_evan_custom.lua` that `init.lua`/`lint.lua` merge in. Definitions are declarative/JSON-serializable only — function fields (`on_attach`, function `settings`, function `parser`, `cwd`/`condition`) must go in init.lua.
+- `customLanguages.<lang>` registers a brand-new language entirely from home-manager (no init.lua edits): a block declares its `filetypes`, a required `server` (`{ name; package; config; }` → `vim.lsp.config`), and optionally:
+  - `filetypeExtensions` — extension → filetype, for filetypes Neovim doesn't detect itself
+  - `bufferOptions` / `bufferOptionsAppend` — buffer-local options applied on `FileType` (`vim.bo` set, `vim.opt_local:append` for list options like `iskeyword`). This is where a language without a Neovim ftplugin gets its `commentstring` and friends; `after/ftplugin/` does **not** work here, because lazy.nvim rebuilds `runtimepath` during setup and drops the Nix config store directory
+  - `highlightLinks` — group → target, for non-standard semantic token types the server declares (Neovim links the standard ones itself)
+  - `formatters` / `linters` — `attrsOf { package; definition; }`, keyed by conform/nvim-lint tool name, each carrying its own `package`
+
+  The module writes a store-backed `~/.config/nvim/lua/neovim_evan_custom.lua` that `init.lua`/`lint.lua` merge in. Definitions are declarative/JSON-serializable only — function fields (`on_attach`, function `settings`, function `parser`, `cwd`/`condition`) must go in init.lua. Anything language-specific belongs in the block, not in `init.lua`.
 
 Example:
 ```nix

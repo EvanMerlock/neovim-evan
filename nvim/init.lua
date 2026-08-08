@@ -20,6 +20,33 @@ vim.filetype.add({
 	}, (ok_custom_ft and type(custom_ft) == "table" and custom_ft.filetype_extensions) or {}),
 })
 
+-- Buffer-local settings contributed by custom languages. A filetype Neovim
+-- ships no ftplugin for has no other source for these, and after/ftplugin/ is
+-- not available: lazy.nvim rebuilds runtimepath during setup and drops the Nix
+-- config store directory, so nothing under it is sourced in the `nix run`
+-- path. init.lua is loaded by `-u` either way.
+local custom_buffers = (ok_custom_ft and type(custom_ft) == "table" and custom_ft.buffer_settings) or {}
+if next(custom_buffers) then
+	vim.api.nvim_create_autocmd("FileType", {
+		-- One autocmd for every custom language: on a FileType event
+		-- `args.match` is the filetype, so the right settings are a lookup
+		-- rather than a closure per language.
+		pattern = vim.tbl_keys(custom_buffers),
+		group = vim.api.nvim_create_augroup("custom-language-buffers", { clear = true }),
+		callback = function(args)
+			local settings = custom_buffers[args.match] or {}
+			for name, value in pairs(settings.options or {}) do
+				vim.bo[name] = value
+			end
+			for name, values in pairs(settings.append or {}) do
+				for _, value in ipairs(values) do
+					vim.opt_local[name]:append(value)
+				end
+			end
+		end,
+	})
+end
+
 vim.g.have_nerd_font = true
 
 -- [[ Settings ]]
@@ -458,6 +485,34 @@ require("lazy").setup({
 				},
 			})
 			vim.lsp.enable("lua_ls")
+
+			-- Semantic token groups Neovim does not link by default.
+			-- Neovim links most @lsp.type.* to their treesitter equivalents,
+			-- but leaves every modifier combination unset — so a server's
+			-- extra precision renders as plain text until it is linked.
+			-- Re-applied on ColorScheme because a colorscheme clears
+			-- highlight links when it loads.
+			local function link_lsp_groups()
+				-- defaultLibrary is a standard LSP modifier that many servers
+				-- emit, so these are worth having for every language.
+				local links = {
+					["@lsp.typemod.function.defaultLibrary"] = "@function.builtin",
+					["@lsp.typemod.type.defaultLibrary"] = "@type.builtin",
+				}
+				-- Non-standard token types a custom server declares link
+				-- themselves, via the home-manager module.
+				for from, to in pairs(custom.highlight_links or {}) do
+					links[from] = to
+				end
+				for from, to in pairs(links) do
+					vim.api.nvim_set_hl(0, from, { link = to, default = true })
+				end
+			end
+			link_lsp_groups()
+			vim.api.nvim_create_autocmd("ColorScheme", {
+				group = vim.api.nvim_create_augroup("kickstart-lsp-highlight-links", { clear = true }),
+				callback = link_lsp_groups,
+			})
 		end,
 	},
 
