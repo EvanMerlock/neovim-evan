@@ -9,11 +9,15 @@ vim.g.mapleader = ","
 vim.g.maplocalleader = ","
 
 -- [[ Filetype Detection ]]
--- Register filetypes not recognized by Neovim by default
+-- Register filetypes not recognized by Neovim by default. Custom languages
+-- declared via home-manager contribute their own extensions here (see
+-- neovim_evan_custom.lua); the pcall covers the `nix run` path, where the
+-- module never generates that file.
+local ok_custom_ft, custom_ft = pcall(require, "neovim_evan_custom")
 vim.filetype.add({
-	extension = {
+	extension = vim.tbl_extend("force", {
 		ncl = "nickel",
-	},
+	}, (ok_custom_ft and type(custom_ft) == "table" and custom_ft.filetype_extensions) or {}),
 })
 
 vim.g.have_nerd_font = true

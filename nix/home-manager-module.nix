@@ -37,6 +37,10 @@ let
       else lib.foldl' (a: ft: a // { ${ft} = (a.${ft} or [ ]) ++ names; }) acc l.filetypes)
     { } langs;
 
+  # extension -> filetype, for filetypes Neovim does not detect on its own.
+  # Merged into init.lua's own vim.filetype.add call.
+  filetypeExtensions = lib.foldlAttrs (acc: _: l: acc // l.filetypeExtensions) { } langs;
+
   # tool name -> definition, keeping only non-empty definitions.
   defsOf = getTools: lib.filterAttrs (_: d: d != { })
     (lib.foldlAttrs (acc: _: l: acc // lib.mapAttrs (_: t: t.definition) (getTools l)) { } langs);
@@ -52,6 +56,7 @@ let
 
   customConfig = {
     servers = serverConfigs;
+    filetype_extensions = filetypeExtensions;
     formatters_by_ft = byFt (l: l.formatters);
     formatter_defs = defsOf (l: l.formatters);
     linters_by_ft = byFt (l: l.linters);
@@ -95,6 +100,16 @@ let
         default = [ ];
         example = [ "gleam" ];
         description = "Filetypes this language covers (used for the LSP and formatter/linter mappings).";
+      };
+      filetypeExtensions = lib.mkOption {
+        type = with lib.types; attrsOf str;
+        default = { };
+        example = { hlisp = "hlisp"; };
+        description = ''
+          File extensions to map to a filetype, passed to vim.filetype.add.
+          Needed when the language's filetype is not one Neovim detects by
+          itself; without it the LSP has nothing to attach to.
+        '';
       };
       server = lib.mkOption {
         type = lib.types.submodule {
